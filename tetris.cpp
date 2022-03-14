@@ -330,8 +330,7 @@ int main() {
 
     do {
 
-        /*
-        num = rand() % 2;
+        num = rand() % 3;
         if (!num) {
             shape = 'c';
             c.spawn();
@@ -343,15 +342,14 @@ int main() {
             shape = 't';
             t.spawn();
         }
-        */
 
 
-        shape = 't';
-        t.spawn();
+        // shape = 't';
+        // t.spawn();
 
         cout << shape << endl;
 
-
+        endTurn = 0;
         do {
             tetb.printBoard();
             system("stty raw");
@@ -431,7 +429,7 @@ int main() {
     } while (running);
 
     tetb.printBoard();
-    
+
     //oh my it works?!
 
     return 0;

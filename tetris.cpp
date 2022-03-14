@@ -431,6 +431,8 @@ int main() {
     } while (running);
 
     tetb.printBoard();
+    
+    //oh my it works?!
 
     return 0;
 }

@@ -311,7 +311,6 @@ int main() {
     line l;
     tee t;
 
-
     /*
 
     do:
@@ -330,7 +329,7 @@ int main() {
 
     do {
 
-        num = rand() % 3;
+        num = rand() % 2;
         if (!num) {
             shape = 'c';
             c.spawn();
@@ -338,10 +337,10 @@ int main() {
             shape = 'l';
             l.spawn();
         }
-            else if (num == 2) {
-            shape = 't';
-            t.spawn();
-        }
+        // else if (num == 2) {
+        //     shape = 't';
+        //     t.spawn();
+        // }
 
 
         // shape = 't';
@@ -417,14 +416,15 @@ int main() {
                 }
             }
             if (count == col) {
-                for (k = row-1; k > 0; k--) {
-                    for (m = 0; m < col; m++) {
-                        boardrc[k][m] = boardrc[k-1][m];
+                for (m = i; m > 0; m--) {
+                    for (k = 0; k < col; k++) {
+                        boardrc[m][k] = boardrc[m-1][k];
                     }
                 }
                 i++;
             }
         }
+
 
     } while (running);
 

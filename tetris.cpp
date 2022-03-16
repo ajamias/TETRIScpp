@@ -206,7 +206,7 @@ class line {
                 boardrc[y3][x3] = 'o';
                 boardrc[y4][x4] = 'o';
                 config = 1;
-            } else if (boardrc[y1+1][x1-1] == '.' && boardrc[y3-1][x3+1] == '.' && boardrc[y4-2][x4+2] == '.') {
+            } else if (config == 1 && boardrc[y1+1][x1-1] == '.' && boardrc[y3-1][x3+1] == '.' && boardrc[y4-2][x4+2] == '.') {
                 boardrc[y1][x1] = '.';
                 boardrc[y3][x3] = '.';
                 boardrc[y4][x4] = '.';
@@ -300,12 +300,129 @@ class tee {
 };
 
 
+void playerInput(int* running, board* tetb, cube* c, line* l, tee* t, char* shape, int* endTurn) {
+    int num, count;
+    bool condition;
+    char ch;
+    srand(time(NULL));
+    cout << "input\n";
+    do {
+        num = rand() % 2;
+        if (!num) {
+            *shape = 'c';
+            c->spawn();
+        } else if (num == 1) {
+            *shape = 'l';
+            l->spawn();
+        }
+        // else if (num == 2) {
+        //     shape = 't';
+        //     t->spawn();
+        // }
+
+
+        // shape = 't';
+        // t->spawn();
+
+        cout << shape << endl;
+        *endTurn = 0;
+        do {
+            tetb->printBoard();
+            system("stty raw");
+            ch = getchar();
+            system("stty cooked");
+            if (ch == '\033'){
+                getchar();
+                ch = getchar();
+                switch(ch) { // the real value
+                    case 'A':
+                        if (*shape == 'l' && l->y2 != 0 && l->y2 < row-2 && l->x2 != 0 && l->x2 < col-2) {
+                            l->rotate();
+                        } else if (*shape == 't') {
+                            t->rotate();
+                        }
+                        break;
+                    case 'B':
+                        // code for arrow down
+                        if (*shape == 'c') {
+                            *endTurn = c->down();
+                        } else if (*shape == 'l') {
+                            *endTurn = l->down();
+                        } else if (*shape == 't') {
+                            *endTurn = t->down();
+                        }
+                        break;
+                    case 'C':
+                        // code for arrow right
+                        if (*shape == 'c') {
+                            c->right();
+                        } else if (*shape == 'l') {
+                            l->right();
+                        }
+                        break;
+                    case 'D':
+                        // code for arrow left
+                        if (*shape == 'c') {
+                            c->left();
+                        } else if (*shape == 'l') {
+                            l->left();
+                        }
+                        break;
+                    default:
+                        ch = ' ';
+                }
+
+            } else if (ch == 'q') {
+                *running = 0;
+            } else {
+                system("stty cooked");
+                cout << "invalid input\n";
+            }
+            cout << ch << endl;
+        } while (*running && !*endTurn);
+
+        if (boardrc[0][4] == 'o') {
+            *running = 0;
+        }
+
+        for (i = row-1; i > 0; i--) {
+            count = 0;
+            for (j = 0; j < col; j++) {
+                if (boardrc[i][j] == 'o') {
+                    count++;
+                }
+            }
+            if (count == col) {
+                for (m = i; m > 0; m--) {
+                    for (k = 0; k < col; k++) {
+                        boardrc[m][k] = boardrc[m-1][k];
+                    }
+                }
+                i++;
+            }
+        }
+    } while (*running);
+}
+
+void updateBoard(int* running, board* tetb, cube* c, line* l, tee* t, char* shape, int* endTurn) {
+    while (*running) {
+        cout << "update\n";
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        if (*shape == 'c') {
+            *endTurn = c->down();
+        } else if (*shape == 'l') {
+            *endTurn = l->down();
+        } else if (*shape == 't') {
+            *endTurn = t->down();
+        }
+        system("stty cooked");
+        tetb->printBoard();
+    }
+}
 
 int main() {
-    int running = 1, num, endTurn, count;
-    bool condition;
-    char shape, ch;
-    srand(time(NULL));
+    int running = 1, endTurn;
+    char shape;
     board tetb;
     cube c;
     line l;
@@ -332,108 +449,12 @@ int main() {
     //  move down every "second"
 
 
-    do {
+    // thread this
+    thread inputThread(playerInput, &running, &tetb, &c, &l, &t, &shape, &endTurn);
+    thread updateThread(updateBoard, &running, &tetb, &c, &l, &t, &shape, &endTurn);
 
-        num = rand() % 2;
-        if (!num) {
-            shape = 'c';
-            c.spawn();
-        } else if (num == 1) {
-            shape = 'l';
-            l.spawn();
-        }
-        // else if (num == 2) {
-        //     shape = 't';
-        //     t.spawn();
-        // }
-
-
-        // shape = 't';
-        // t.spawn();
-
-        cout << shape << endl;
-
-        endTurn = 0;
-        do {
-            tetb.printBoard();
-            system("stty raw");
-            ch = getchar();
-            system("stty cooked");
-            if (ch == '\033'){
-                getchar();
-                ch = getchar();
-                switch(ch) { // the real value
-                    case 'A':
-                        if (shape == 'l' && l.y2 != 0 && l.y2 < row-2 && l.x2 != 0 && l.x2 < col-2) {
-                            l.rotate();
-                        } else if (shape == 't') {
-                            t.rotate();
-                        }
-                        break;
-                    case 'B':
-                        // code for arrow down
-                        if (shape == 'c') {
-                            endTurn = c.down();
-                        } else if (shape == 'l') {
-                            endTurn = l.down();
-                        } else if (shape == 't') {
-                            endTurn = t.down();
-                        }
-                        break;
-                    case 'C':
-                        // code for arrow right
-                        if (shape == 'c') {
-                            c.right();
-                        } else if (shape == 'l') {
-                            l.right();
-                        }
-                        break;
-                    case 'D':
-                        // code for arrow left
-                        if (shape == 'c') {
-                            c.left();
-                        } else if (shape == 'l') {
-                            l.left();
-                        }
-                        break;
-                    default:
-                        ch = ' ';
-                }
-
-            } else if (ch == 'q') {
-                running = 0;
-            } else {
-                system("stty cooked");
-                cout << "invalid input\n";
-            }
-            cout << ch << endl;
-        } while (running && !endTurn);
-
-        if (boardrc[0][4] == 'o') {
-            running = 0;
-        }
-
-        for (i = row-1; i > 0; i--) {
-            count = 0;
-            for (j = 0; j < col; j++) {
-                if (boardrc[i][j] == 'o') {
-                    count++;
-                }
-            }
-            if (count == col) {
-                for (m = i; m > 0; m--) {
-                    for (k = 0; k < col; k++) {
-                        boardrc[m][k] = boardrc[m-1][k];
-                    }
-                }
-                i++;
-            }
-        }
-
-
-    } while (running);
-
-    tetb.printBoard();
+    inputThread.join();
+    updateThread.join();
 
     //oh my it works?!
 

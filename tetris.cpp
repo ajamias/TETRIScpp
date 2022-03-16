@@ -2,8 +2,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <chrono>
-//#include <future>
-//#include <unistd.h>
+#include <thread>
+#include <mutex>
 using namespace std;
 
 #define row 20
@@ -325,6 +325,11 @@ int main() {
     */
 
     // TODO use async to concurrently update board with user inputs
+    //while game is running,
+    //  set variables
+    //  get user input
+    //  update game every frame
+    //  move down every "second"
 
 
     do {
